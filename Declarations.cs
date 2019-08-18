@@ -1,46 +1,52 @@
-  // Do learn to insert your names and a brief description of what the program is supposed to do!
+// Do learn to insert your names and a brief description of what the program is supposed to do!
 
-  // This is a skeleton program for developing a parser for Modula-2 declarations
-  // P.D. Terry, Rhodes University
-  using Library;
-  using System;
-  using System.Text;
+// This is a skeleton program for developing a parser for Modula-2 declarations
+// P.D. Terry, Rhodes University
+using Library;
+using System;
+using System.Text;
 
-  class Token {
+class Token
+{
     public int kind;
     public string val;
 
-    public Token(int kind, string val) {
-      this.kind = kind;
-      this.val = val;
+    public Token(int kind, string val)
+    {
+        this.kind = kind;
+        this.val = val;
     }
 
-  } // Token
+} // Token
 
-  class Declarations {
+class Declarations
+{
 
     // +++++++++++++++++++++++++ File Handling and Error handlers ++++++++++++++++++++
 
     static InFile input;
     static OutFile output;
 
-    static string NewFileName(string oldFileName, string ext) {
-    // Creates new file name by changing extension of oldFileName to ext
-      int i = oldFileName.LastIndexOf('.');
-      if (i < 0) return oldFileName + ext; else return oldFileName.Substring(0, i) + ext;
+    static string NewFileName(string oldFileName, string ext)
+    {
+        // Creates new file name by changing extension of oldFileName to ext
+        int i = oldFileName.LastIndexOf('.');
+        if (i < 0) return oldFileName + ext; else return oldFileName.Substring(0, i) + ext;
     } // NewFileName
 
-    static void ReportError(string errorMessage) {
-    // Displays errorMessage on standard output and on reflected output
-      Console.WriteLine(errorMessage);
-      output.WriteLine(errorMessage);
+    static void ReportError(string errorMessage)
+    {
+        // Displays errorMessage on standard output and on reflected output
+        Console.WriteLine(errorMessage);
+        output.WriteLine(errorMessage);
     } // ReportError
 
-    static void Abort(string errorMessage) {
-    // Abandons parsing after issuing error message
-      ReportError(errorMessage);
-      output.Close();
-      System.Environment.Exit(1);
+    static void Abort(string errorMessage)
+    {
+        // Abandons parsing after issuing error message
+        ReportError(errorMessage);
+        output.Close();
+        System.Environment.Exit(1);
     } // Abort
 
     // +++++++++++++++++++++++  token kinds enumeration +++++++++++++++++++++++++
@@ -69,7 +75,7 @@
       LParenSym = 20,
       RParenSym = 21;
 
-      // and others like this
+    // and others like this
 
     // +++++++++++++++++++++++++++++ Character Handler ++++++++++++++++++++++++++
 
@@ -81,15 +87,17 @@
 
     static char ch;    // look ahead character for scanner
 
-    static void GetChar() {
-    // Obtains next character ch from input, or CHR(0) if EOF reached
-    // Reflect ch to output
-      if (atEndOfFile) ch = EOF;
-      else {
-        ch = input.ReadChar();
-        atEndOfFile = ch == EOF;
-        if (!atEndOfFile) output.Write(ch);
-      }
+    static void GetChar()
+    {
+        // Obtains next character ch from input, or CHR(0) if EOF reached
+        // Reflect ch to output
+        if (atEndOfFile) ch = EOF;
+        else
+        {
+            ch = input.ReadChar();
+            atEndOfFile = ch == EOF;
+            if (!atEndOfFile) output.Write(ch);
+        }
     } // GetChar
 
     // +++++++++++++++++++++++++++++++ Scanner ++++++++++++++++++++++++++++++++++
@@ -99,180 +107,583 @@
 
     static Token sym;
 
-    static void GetSym() {
-    // Scans for next sym from input
-      while (ch > EOF && ch <= ' ') GetChar();
+    static void GetSym()
+    {
+        // Scans for next sym from input
+        while (ch > EOF && ch <= ' ') GetChar();
 
-      StringBuilder symLex = new StringBuilder();
-      int symKind = noSym;
+        StringBuilder symLex = new StringBuilder();
+        int symKind = noSym;
+        
 
-        if (ch == '(')
-        {
-            GetChar();
-            if (ch == '*')
-            {
-                while (true)
-                {
-                    GetChar();
-                    if (ch == '*')
-                    {
-                        GetChar();
-                        if (ch == ')')
-                        {
-                            GetChar();
-                            break;
-                        }
-                    }
 
-                }
-            }
-            else {
+
+
+        switch (ch)
+        { 
+
+            case 'T':
                 symLex.Append(ch);
-            }
-        }
-
-      while (ch > ' ') {
-          symLex.Append(ch);
-          GetChar();
-      }
-
-      string s = symLex.ToString();
-
-      switch (s) {
-            case "\0":
-                symKind = EOFSym;
+                GetChar();
+                switch (ch)
+                {
+                    case 'O':
+                        symLex.Append(ch);
+                        GetChar();
+                        symKind = ToSym;
+                        break;
+                    case 'Y':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'P':
+                                symLex.Append(ch);
+                                GetChar();
+                                switch (ch)
+                                {
+                                    case 'E':
+                                        symLex.Append(ch);
+                                        GetChar();
+                                        symKind = TypeSym; // make the Sym
+                                        break;
+                                    default:
+                                        while (char.IsLetter(ch))
+                                        {
+                                            symLex.Append(ch);
+                                            GetChar();
+                                        }
+                                        symKind = IdentSym;
+                                        break;
+                                }
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "TYPE":
-                symKind = TypeSym;
+            case 'V':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'A':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'R':
+                                symLex.Append(ch);
+                                GetChar();
+                                symKind = VarSym;
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "VAR":
-                symKind = VarSym;
+            case 'S':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'E':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'T':
+                                symLex.Append(ch);
+                                GetChar();
+                                symKind = SetSym;
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "SET":
-                symKind = SetSym;
+            case 'O':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'F':
+                        symLex.Append(ch);
+                        GetChar();
+                        symKind = OfSym;
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "OF":
-                symKind = OfSym;
+            case 'A':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'R':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'R':
+                                symLex.Append(ch);
+                                GetChar();
+                                switch (ch)
+                                {
+                                    case 'A':
+                                        symLex.Append(ch);
+                                        GetChar();
+                                        switch (ch)
+                                        {
+                                            case 'Y':
+                                                symLex.Append(ch);
+                                                GetChar();
+                                                symKind = ArraySym;
+                                                break;
+                                            default:
+                                                while (char.IsLetter(ch))
+                                                {
+                                                    symLex.Append(ch);
+                                                    GetChar();
+                                                }
+                                                symKind = IdentSym;
+                                                break;
+                                        }
+                                        break;
+                                    default:
+                                        while (char.IsLetter(ch))
+                                        {
+                                            symLex.Append(ch);
+                                            GetChar();
+                                        }
+                                        symKind = IdentSym;
+                                        break;
+                                }
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "TO":
-                symKind = ToSym;
+            case 'R':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'E':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'C':
+                                symLex.Append(ch);
+                                GetChar();
+                                switch (ch)
+                                {
+                                    case 'O':
+                                        symLex.Append(ch);
+                                        GetChar();
+                                        switch (ch)
+                                        {
+                                            case 'R':
+                                                symLex.Append(ch);
+                                                GetChar();
+                                                switch (ch)
+                                                {
+                                                    case 'D':
+                                                        symLex.Append(ch);
+                                                        GetChar();
+                                                        symKind = RecordSym;
+                                                        break;
+                                                    default:
+                                                        while (char.IsLetter(ch))
+                                                        {
+                                                            symLex.Append(ch);
+                                                            GetChar();
+                                                        }
+                                                        symKind = IdentSym;
+                                                        break;
+                                                }
+                                                break;
+                                            default:
+                                                while (char.IsLetter(ch))
+                                                {
+                                                    symLex.Append(ch);
+                                                    GetChar();
+                                                }
+                                                symKind = IdentSym;
+                                                break;
+                                        }
+                                        break;
+                                    default:
+                                        while (char.IsLetter(ch))
+                                        {
+                                            symLex.Append(ch);
+                                            GetChar();
+                                        }
+                                        symKind = IdentSym;
+                                        break;
+                                }
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "ARRAY":
-                symKind = ArraySym;
+            case 'P':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'O':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'I':
+                                symLex.Append(ch);
+                                GetChar();
+                                switch (ch)
+                                {
+                                    case 'N':
+                                        symLex.Append(ch);
+                                        GetChar();
+                                        switch (ch)
+                                        {
+                                            case 'T':
+                                                symLex.Append(ch);
+                                                GetChar();
+                                                switch (ch)
+                                                {
+                                                    case 'E':
+                                                        symLex.Append(ch);
+                                                        GetChar();
+                                                        switch (ch)
+                                                        {
+                                                            case 'R':
+                                                                symLex.Append(ch);
+                                                                GetChar();
+                                                                symKind = PointerSym;
+                                                                break;
+                                                            default:
+                                                                while (char.IsLetter(ch))
+                                                                {
+                                                                    symLex.Append(ch);
+                                                                    GetChar();
+                                                                }
+                                                                symKind = IdentSym;
+                                                                break;
+                                                        }
+                                                        break;
+                                                    default:
+                                                        while (char.IsLetter(ch))
+                                                        {
+                                                            symLex.Append(ch);
+                                                            GetChar();
+                                                        }
+                                                        symKind = IdentSym;
+                                                        break;
+                                                }
+                                                break;
+                                            default:
+                                                while (char.IsLetter(ch))
+                                                {
+                                                    symLex.Append(ch);
+                                                    GetChar();
+                                                }
+                                                symKind = IdentSym;
+                                                break;
+                                        }
+                                        break;
+                                    default:
+                                        while (char.IsLetter(ch))
+                                        {
+                                            symLex.Append(ch);
+                                            GetChar();
+                                        }
+                                        symKind = IdentSym;
+                                        break;
+                                }
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "RECORD":
-                symKind = RecordSym;
+            case 'E':
+                symLex.Append(ch);
+                GetChar();
+                switch (ch)
+                {
+                    case 'N':
+                        symLex.Append(ch);
+                        GetChar();
+                        switch (ch)
+                        {
+                            case 'D':
+                                symLex.Append(ch);
+                                GetChar();
+                                symKind = EndSym;
+                                break;
+                            default:
+                                while (char.IsLetter(ch))
+                                {
+                                    symLex.Append(ch);
+                                    GetChar();
+                                }
+                                symKind = IdentSym;
+                                break;
+                        }
+                        break;
+                    default:
+                        while (char.IsLetter(ch))
+                        {
+                            symLex.Append(ch);
+                            GetChar();
+                        }
+                        symKind = IdentSym;
+                        break;
+                }
                 break;
-            case "POINTER":
-                symKind = PointerSym;
-                break;
-            case "END":
-                symKind = EndSym;
-                break;
-            case ";":
+            case ';':
+                symLex.Append(ch);
+                GetChar();
                 symKind = SemiSym;
                 break;
-            case ":":
+            case ':':
+                symLex.Append(ch);
+                GetChar();
                 symKind = ColonSym;
                 break;
-            case "=":
+            case '=':
+                symLex.Append(ch);
+                GetChar();
                 symKind = AssignSym;
                 break;
-            case ".":
-                symKind = PeriodSym;
+            case '.':
+                symLex.Append(ch);
+                symKind = PeriodSym; //assumeing it its a period
+                GetChar();
+                switch (ch)
+                {
+                    case '.':
+                        symKind = RangeSym;
+                        symLex.Append(ch);
+                        GetChar();
+                        break;
+                    default:
+                        // DO NOTHING!!
+                        break;
+                }
                 break;
-            case "..":
-                symKind = RangeSym;
-                break;
-            case "[":
+            case '[':
+                symLex.Append(ch);
+                GetChar();
                 symKind = LBracketSym;
                 break;
-            case "]":
+            case ']':
+                symLex.Append(ch);
+                GetChar();
                 symKind = RBracketSym;
                 break;
-            case "(":
+            case '(':
+                symLex.Append(ch);
+                GetChar();
                 symKind = LParenSym;
                 break;
-            case ")":
+            case ')':
+                symLex.Append(ch);
+                GetChar();
                 symKind = RParenSym;
                 break;
+            case '\0':
+                symKind = EOFSym;
+                symLex.Append(ch);
+                break;
             default:
-                if (char.IsDigit(symLex[0])) {
-
-                    symKind = NumSym;
-
-                    for (int i = 1; i < symLex.Length; i++)
-                        if (!char.IsDigit(symLex[i]))
-                        {
-                            symKind = noSym;
-                            break;
-                        }
+                if (char.IsDigit(ch))
+                {
+                    symLex.Append(ch);
+                    symKind = NumSym; //assume its a digit
+                    GetChar();
+                    while (char.IsDigit(ch))
+                    {
+                        symLex.Append(ch);
+                        GetChar();
+                    }
+                   
                 }
-                else if (char.IsLetter(symLex[0])) {
+                else if (char.IsLetter(ch))
+                {
+                    symLex.Append(ch);
+                    symKind = IdentSym;      //assume its a ident
+                    GetChar();
+                    while (char.IsLetterOrDigit(ch))
+                    {
+                        symLex.Append(ch);
+                        GetChar();
+                    }
+                }else
+                {
+                    symLex.Append(ch);
+                    GetChar();
+                }
+                break;
+        }
 
-                    symKind = IdentSym;
 
-                    for (int i = 1; i < symLex.Length; i++)
-                        if (!char.IsLetterOrDigit(symLex[i]))
-                        {
-                            symKind = noSym;
-                            break;
-                        }
-                }            
-                break;      
-      }
- 
-      sym = new Token(symKind, symLex.ToString());
+        sym = new Token(symKind, symLex.ToString());
+
     } // GetSym
 
-  /*  ++++ Commented out for the moment
+    /*  ++++ Commented out for the moment
 
-    // +++++++++++++++++++++++++++++++ Parser +++++++++++++++++++++++++++++++++++
+      // +++++++++++++++++++++++++++++++ Parser +++++++++++++++++++++++++++++++++++
 
-    static void Accept(int wantedSym, string errorMessage) {
-    // Checks that lookahead token is wantedSym
-      if (sym.kind == wantedSym) GetSym(); else Abort(errorMessage);
-    } // Accept
+      static void Accept(int wantedSym, string errorMessage) {
+      // Checks that lookahead token is wantedSym
+        if (sym.kind == wantedSym) GetSym(); else Abort(errorMessage);
+      } // Accept
 
-    static void Accept(IntSet allowedSet, string errorMessage) {
-    // Checks that lookahead token is in allowedSet
-      if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage);
-    } // Accept
+      static void Accept(IntSet allowedSet, string errorMessage) {
+      // Checks that lookahead token is in allowedSet
+        if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage);
+      } // Accept
 
-    static void Mod2Decl() {}
+      static void Mod2Decl() {}
 
-  ++++++ */
+    ++++++ */
 
     // +++++++++++++++++++++ Main driver function +++++++++++++++++++++++++++++++
 
-    public static void Main(string[] args) {
-      // Open input and output files from command line arguments
-      if (args.Length == 0) {
-        Console.WriteLine("Usage: Declarations FileName");
-        System.Environment.Exit(1);
-      }
-      input = new InFile(args[0]);
-      output = new OutFile(NewFileName(args[0], ".out"));
+    public static void Main(string[] args)
+    {
+        // Open input and output files from command line arguments
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Usage: Declarations FileName");
+            System.Environment.Exit(1);
+        }
+        input = new InFile(args[0]);
+        output = new OutFile(NewFileName(args[0], ".out"));
 
-      GetChar();                                  // Lookahead character
+        GetChar();                                  // Lookahead character
 
-  //  To test the scanner we can use a loop like the following:
+        //  To test the scanner we can use a loop like the following:
 
-      do {
-        GetSym();                                 // Lookahead symbol
-        OutFile.StdOut.Write(sym.kind, 3);
-        OutFile.StdOut.WriteLine(" " + sym.val);  // See what we got
-      } while (sym.kind != EOFSym);
+        do
+        {
+            GetSym();                                 // Lookahead symbol
+            OutFile.StdOut.Write(sym.kind, 3);
+            OutFile.StdOut.WriteLine(" " + sym.val);  // See what we got
+        } while (sym.kind != EOFSym);
 
-  /*  After the scanner is debugged we shall substitute this code:
+        /*  After the scanner is debugged we shall substitute this code:
 
-      GetSym();                                   // Lookahead symbol
-      Mod2Decl();                                 // Start to parse from the goal symbol
-      // if we get back here everything must have been satisfactory
-      Console.WriteLine("Parsed correctly");
+            GetSym();                                   // Lookahead symbol
+            Mod2Decl();                                 // Start to parse from the goal symbol
+            // if we get back here everything must have been satisfactory
+            Console.WriteLine("Parsed correctly");
 
-  */
-      output.Close();
+        */
+        output.Close();
     } // Main
 
-  } // Declarations
+} // Declarations

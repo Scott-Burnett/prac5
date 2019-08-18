@@ -5,3 +5,4 @@ RECORD   SET   TO   TYPE   VAR
 (   )
 {   }
 bad_name
+Semi
