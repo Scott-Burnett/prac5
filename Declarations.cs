@@ -70,10 +70,11 @@ class Declarations
       AssignSym = 15,
       PeriodSym = 16,
       RangeSym = 17,
-      LBracketSym = 18,
-      RBracketSym = 19,
-      LParenSym = 20,
-      RParenSym = 21;
+      CommaSym = 18,
+      LBracketSym = 19,
+      RBracketSym = 20,
+      LParenSym = 21,
+      RParenSym = 22;
 
     // and others like this
 
@@ -105,6 +106,15 @@ class Declarations
     // Declaring sym as a global variable is done for expediency - global variables
     // are not always a good thing
 
+    static bool isValid(char ch)
+    {
+        if (char.IsLetterOrDigit(ch) || ch == EOF || ch == ';' || ch == ':' || ch == '=' || ch == '.'
+                                     || ch == '[' || ch == ']' || ch == '(' || ch == ')' || ch == ',')
+            return true;
+        else
+            return false;
+    }
+
     static Token sym;
 
     static void GetSym()
@@ -114,14 +124,13 @@ class Declarations
 
         StringBuilder symLex = new StringBuilder();
         int symKind = noSym;
-        
-
-
-
 
         switch (ch)
-        { 
-
+        {
+            case EOF:
+                symKind = EOFSym;
+                symLex.Append(ch);
+                break;
             case 'T':
                 symLex.Append(ch);
                 GetChar();
@@ -600,11 +609,13 @@ class Declarations
                                 if (ch == ')')
                                 {
                                     GetChar();
-                                    GetSym();
+                                    symKind = noSym;
+                                    GetSym();   //recusive call
                                     break;
                                 }
                             }
                         }
+                        break;
                     default:
                         break;
                 }
@@ -614,34 +625,31 @@ class Declarations
                 GetChar();
                 symKind = RParenSym;
                 break;
-            case '\0':
-                symKind = EOFSym;
-                symLex.Append(ch);
-                break;
             default:
                 if (char.IsDigit(ch))
                 {
                     symLex.Append(ch);
-                    symKind = NumSym; //assume its a digit
+                    symKind = NumSym;
                     GetChar();
                     while (char.IsDigit(ch))
                     {
                         symLex.Append(ch);
                         GetChar();
                     }
-                   
+
                 }
                 else if (char.IsLetter(ch))
                 {
                     symLex.Append(ch);
-                    symKind = IdentSym;      //assume its a ident
+                    symKind = IdentSym;
                     GetChar();
                     while (char.IsLetterOrDigit(ch))
                     {
                         symLex.Append(ch);
                         GetChar();
                     }
-                }else
+                }
+                else
                 {
                     symLex.Append(ch);
                     GetChar();
@@ -654,24 +662,31 @@ class Declarations
 
     } // GetSym
 
-    /*  ++++ Commented out for the moment
+    /*
 
-      // +++++++++++++++++++++++++++++++ Parser +++++++++++++++++++++++++++++++++++
+    // +++++++++++++++++++++++++++++++ Parser +++++++++++++++++++++++++++++++++++
 
-      static void Accept(int wantedSym, string errorMessage) {
-      // Checks that lookahead token is wantedSym
+    static void Accept(int wantedSym, string errorMessage)
+    {
+        // Checks that lookahead token is wantedSym
         if (sym.kind == wantedSym) GetSym(); else Abort(errorMessage);
-      } // Accept
+    } // Accept
 
-      static void Accept(IntSet allowedSet, string errorMessage) {
-      // Checks that lookahead token is in allowedSet
+    static void Accept(IntSet allowedSet, string errorMessage)
+    {
+        // Checks that lookahead token is in allowedSet
         if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage);
-      } // Accept
+    } // Accept
 
-      static void Mod2Decl() {}
+    static void Mod2Decl()
+    {
+        if (sym.kind == noSym)
+        {
+            Abort("Oh no! there is a mestake");
+        }
 
-    ++++++ */
-
+    }
+    */
     // +++++++++++++++++++++ Main driver function +++++++++++++++++++++++++++++++
 
     public static void Main(string[] args)
@@ -689,21 +704,21 @@ class Declarations
 
         //  To test the scanner we can use a loop like the following:
 
-        do
-        {
-            GetSym();                                 // Lookahead symbol
-            OutFile.StdOut.Write(sym.kind, 3);
-            OutFile.StdOut.WriteLine(" " + sym.val);  // See what we got
-        } while (sym.kind != EOFSym);
-
-        /*  After the scanner is debugged we shall substitute this code:
-
-            GetSym();                                   // Lookahead symbol
-            Mod2Decl();                                 // Start to parse from the goal symbol
-            // if we get back here everything must have been satisfactory
-            Console.WriteLine("Parsed correctly");
-
+         do
+         {
+             GetSym();                                 // Lookahead symbol
+             OutFile.StdOut.Write(sym.kind, 3);
+             OutFile.StdOut.WriteLine(" " + sym.val);  // See what we got
+         } while (sym.kind != EOFSym);
+         
+        /*  After the scanner is debugged we shall substitute this code: */
+        /*
+        GetSym();                                   // Lookahead symbol
+        Mod2Decl();                                 // Start to parse from the goal symbol
+                                                    // if we get back here everything must have been satisfactory
+        Console.WriteLine("Parsed correctly");
         */
+
         output.Close();
     } // Main
 
