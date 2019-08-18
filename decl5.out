@@ -8,7 +8,6 @@ VAR
 VAR
   (* It is acceptable to have an empty sequence here *)
 TYPE
-<---- Not a Symbol in this language
   SmallInts = [ 1 .. 31 ];
   Persons = RECORD
               Name, Surname : ARRAY [0 .. 10] OF CHAR;
@@ -22,4 +21,3 @@ VAR
 TYPE
   (* It is acceptable to have an empty sequence here *)
 
-<---- Not a Symbol in this language

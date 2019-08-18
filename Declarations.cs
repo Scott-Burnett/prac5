@@ -592,13 +592,12 @@ class Declarations
                 symKind = RBracketSym;
                 break;
             case '(':
-                symLex.Append(ch);
                 GetChar();
                 symKind = LParenSym;
                 switch (ch)
                 {
                     case '*': //this is a comment
-                        symKind = noSym;
+                        symKind = -1;
 
                         while (true)
                         {
@@ -609,14 +608,13 @@ class Declarations
                                 if (ch == ')')
                                 {
                                     GetChar();
-                                    GetSym(); // recursive call
                                     break;
                                 }
                             }
                         }
                         break;
                     default:
-                        //DO NOTHING
+                        symLex.Append(ch);
                         break;
                 }
                 break;
@@ -657,8 +655,8 @@ class Declarations
                 break;
         }
 
-
-        sym = new Token(symKind, symLex.ToString());
+        if (symKind != -1) sym = new Token(symKind, symLex.ToString());
+        else GetSym(); //recursive call
 
     } // GetSym
 
