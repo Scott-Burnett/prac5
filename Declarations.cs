@@ -582,6 +582,11 @@ class Declarations
                         break;
                 }
                 break;
+            case ',':
+                symLex.Append(ch);
+                GetChar();
+                symKind = CommaSym;
+                break;
             case '[':
                 symLex.Append(ch);
                 GetChar();
@@ -662,7 +667,7 @@ class Declarations
 
     } // GetSym
 
-    /*
+    
 
     // +++++++++++++++++++++++++++++++ Parser +++++++++++++++++++++++++++++++++++
 
@@ -680,13 +685,17 @@ class Declarations
 
     static void Mod2Decl()
     {
-        if (sym.kind == noSym)
+        switch (sym.kind)
         {
-            Abort("Oh no! there is a mestake");
+            case EOFSym:
+                Abort("There was a syntax error");
+                break;
+            default:
+                break;
         }
 
     }
-    */
+    
     // +++++++++++++++++++++ Main driver function +++++++++++++++++++++++++++++++
 
     public static void Main(string[] args)
@@ -703,21 +712,25 @@ class Declarations
         GetChar();                                  // Lookahead character
 
         //  To test the scanner we can use a loop like the following:
-
+       /* 
          do
          {
              GetSym();                                 // Lookahead symbol
              OutFile.StdOut.Write(sym.kind, 3);
              OutFile.StdOut.WriteLine(" " + sym.val);  // See what we got
          } while (sym.kind != EOFSym);
-         
-        /*  After the scanner is debugged we shall substitute this code: */
-        /*
-        GetSym();                                   // Lookahead symbol
-        Mod2Decl();                                 // Start to parse from the goal symbol
-                                                    // if we get back here everything must have been satisfactory
+
+        /*  After the scanner is debugged we shall substitute this code: 
+        input = new InFile(args[0]);
+        output = new OutFile(NewFileName(args[0], ".out"));    // reseting it so we can test both at the same time*/
+
+        do
+        {
+            GetSym();                                   // Lookahead symbol
+            Mod2Decl();                                 // Start to parse from the goal symbol
+        } while (sym.kind != EOFSym);                                        // if we get back here everything must have been satisfactory
         Console.WriteLine("Parsed correctly");
-        */
+        
 
         output.Close();
     } // Main
