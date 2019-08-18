@@ -3,4 +3,9 @@ Colours   END   OF   ARRAY   POINTER
 RECORD   SET   TO   TYPE   VAR
 [   ]
 (   )
-{ Oh no! there is a mestake
+{ {<---- Not a Symbol in this language
+  }
+}<---- Not a Symbol in this language
+bad_n_<---- Not a Symbol in this language
+ame
+Semi

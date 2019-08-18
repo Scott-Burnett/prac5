@@ -1,7 +1,7 @@
 // Do learn to insert your names and a brief description of what the program is supposed to do!
 
 // This is a skeleton program for developing a parser for Modula-2 declarations
-// P.D. Terry, Rhodes University
+// P.D. Terry, Rhodes University Addaped by Redy van DYk && Scott Burnett
 using Library;
 using System;
 using System.Text;
@@ -34,19 +34,18 @@ class Declarations
         if (i < 0) return oldFileName + ext; else return oldFileName.Substring(0, i) + ext;
     } // NewFileName
 
-    static void ReportError(string errorMessage)
+    static void ReportError(string errorMessage, string token)      //eddited.
     {
         // Displays errorMessage on standard output and on reflected output
-        Console.WriteLine(errorMessage);
-        output.WriteLine(errorMessage);
+        Console.WriteLine(token + "<---- " + errorMessage);
+        output.WriteLine(token + "<---- " + errorMessage);
     } // ReportError
 
-    static void Abort(string errorMessage)
+    static void Abort(string errorMessage, string token)           //eddited.
     {
-        // Abandons parsing after issuing error message
-        ReportError(errorMessage);
-        output.Close();
-        System.Environment.Exit(1);
+        // reports error and carries on
+        ReportError(errorMessage, token);
+        
     } // Abort
 
     // +++++++++++++++++++++++  token kinds enumeration +++++++++++++++++++++++++
@@ -108,8 +107,7 @@ class Declarations
 
     static bool isValid(char ch)
     {
-        if (char.IsLetterOrDigit(ch) || ch == EOF || ch == ';' || ch == ':' || ch == '=' || ch == '.'
-                                     || ch == '[' || ch == ']' || ch == '(' || ch == ')' || ch == ',')
+        if (char.IsLetterOrDigit(ch) || ch == EOF || ch == ';' || ch == ':' || ch == '=' || ch == '.' || ch == '[' || ch == ']' || ch == '(' || ch == ')' || ch == ',')
             return true;
         else
             return false;
@@ -674,23 +672,25 @@ class Declarations
     static void Accept(int wantedSym, string errorMessage)
     {
         // Checks that lookahead token is wantedSym
-        if (sym.kind == wantedSym) GetSym(); else Abort(errorMessage);
+        if (sym.kind == wantedSym) GetSym(); else Abort(errorMessage, sym.val);
     } // Accept
 
     static void Accept(IntSet allowedSet, string errorMessage)
     {
         // Checks that lookahead token is in allowedSet
-        if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage);
+        if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage, sym.val);
     } // Accept
 
     static void Mod2Decl()
     {
         switch (sym.kind)
         {
-            case EOFSym:
-                Abort("There was a syntax error");
+            case noSym:
+                Abort("Not a Symbol in this language", sym.val);
                 break;
             default:
+                OutFile.StdOut.Write(sym.kind, 3);
+                OutFile.StdOut.WriteLine(" " + sym.val);
                 break;
         }
 
@@ -729,7 +729,7 @@ class Declarations
             GetSym();                                   // Lookahead symbol
             Mod2Decl();                                 // Start to parse from the goal symbol
         } while (sym.kind != EOFSym);                                        // if we get back here everything must have been satisfactory
-        Console.WriteLine("Parsed correctly");
+        Console.WriteLine("End of file reached");
         
 
         output.Close();
