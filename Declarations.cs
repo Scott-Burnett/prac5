@@ -41,11 +41,13 @@ class Declarations
         output.WriteLine(token + "<---- " + errorMessage);
     } // ReportError
 
-    static void Abort(string errorMessage, string token)           //eddited.
+    static void Abort(string errorMessage, string token)           
     {
         // reports error and carries on
         ReportError(errorMessage, token);
-        
+        output.Close();
+        System.Environment.Exit(1);
+
     } // Abort
 
     // +++++++++++++++++++++++  token kinds enumeration +++++++++++++++++++++++++
@@ -105,13 +107,7 @@ class Declarations
     // Declaring sym as a global variable is done for expediency - global variables
     // are not always a good thing
 
-    static bool isValid(char ch)
-    {
-        if (char.IsLetterOrDigit(ch) || ch == EOF || ch == ';' || ch == ':' || ch == '=' || ch == '.' || ch == '[' || ch == ']' || ch == '(' || ch == ')' || ch == ',')
-            return true;
-        else
-            return false;
-    }
+    
 
     static Token sym;
 
@@ -603,6 +599,7 @@ class Declarations
                 {
                     case '*': //this is a comment
                         symKind = noSym;
+
                         while (true)
                         {
                             GetChar();
@@ -612,14 +609,14 @@ class Declarations
                                 if (ch == ')')
                                 {
                                     GetChar();
-                                    symKind = noSym;
-                                    GetSym();   //recusive call
+                                    GetSym(); // recursive call
                                     break;
                                 }
                             }
                         }
                         break;
                     default:
+                        //DO NOTHING
                         break;
                 }
                 break;
@@ -686,7 +683,7 @@ class Declarations
         switch (sym.kind)
         {
             case noSym:
-                Abort("Not a Symbol in this language", sym.val);
+                ReportError("Not a Symbol in this language", sym.val);
                 break;
             default:
                 OutFile.StdOut.Write(sym.kind, 3);
