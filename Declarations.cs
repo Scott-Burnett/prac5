@@ -587,6 +587,27 @@ class Declarations
                 symLex.Append(ch);
                 GetChar();
                 symKind = LParenSym;
+                switch (ch)
+                {
+                    case '*': //this is a comment
+                        symKind = noSym;
+                        while (true)
+                        {
+                            GetChar();
+                            if (ch == '*')
+                            {
+                                GetChar();
+                                if (ch == ')')
+                                {
+                                    GetChar();
+                                    GetSym();
+                                    break;
+                                }
+                            }
+                        }
+                    default:
+                        break;
+                }
                 break;
             case ')':
                 symLex.Append(ch);
