@@ -1,0 +1,36 @@
+COMPILER Mod2Decl $CN
+ /* Grammar for a subset of Modula-2 type and variable declarations
+ P.D. Terry, Rhodes University */
+
+CHARACTERS
+    letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" .
+    digit = "0123456789".
+
+TOKENS
+    identifier = letter { letter | digit }.
+    number = digit { digit } .
+    COMMENTS FROM '(*' TO '*)'
+    IGNORE CHR(0) .. CHR(31)
+
+PRODUCTIONS
+    Mod2Decl = { Declaration } .
+    Declaration = "TYPE" { TypeDecl SYNC ";" }
+    | "VAR" { VarDecl SYNC ";" } .
+    TypeDecl = identifier "=" Type .
+    VarDecl = IdentList ":" Type .
+    Type = SimpleType | ArrayType | RecordType
+    | SetType | PointerType .
+    SimpleType = QualIdent [ Subrange ] | Enumeration | Subrange .
+    QualIdent = identifier { "." identifier } .
+    Subrange = "[" Constant ".." Constant "]" .
+    Constant = number | identifier .
+    Enumeration = "(" IdentList ")" .
+    IdentList = identifier { "," identifier } .
+    ArrayType = "ARRAY" SimpleType { "," SimpleType } "OF" Type.
+    RecordType = "RECORD" FieldLists "END" .
+    FieldLists = FieldList { ";" FieldList } .
+    FieldList = [ IdentList ":" Type ] .
+    SetType = "SET" "OF" SimpleType .
+    PointerType = "POINTER" "TO" Type .
+
+END Mod2Decl.
