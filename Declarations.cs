@@ -900,11 +900,9 @@ class Declarations
         do
         {
             GetSym();                                   // Lookahead symbol
-            Mod2Decl();                                 // Start to parse from the goal symbol
+            if (First_Mod2decl.contains(sym.kind)) Mod2Decl(); else ReportError ("Incorrect starting symbol");                                // Start to parse from the goal symbol
         } while (sym.kind != EOFSym);                                        // if we get back here everything must have been satisfactory
-        Console.WriteLine("End of file reached/nError Count: " + errorCnt);
-        
-
+        (errorCnt == 0) ? Console.WriteLine("Parsed correctly") : Console.WriteLine("End of file reached/nError Count: " + errorCnt);
         output.Close();
     } // Main
 
