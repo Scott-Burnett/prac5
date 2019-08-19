@@ -34,6 +34,13 @@ class Declarations
         if (i < 0) return oldFileName + ext; else return oldFileName.Substring(0, i) + ext;
     } // NewFileName
 
+    static void ReportError(string errorMessage)      //eddited.
+    {
+        // Displays errorMessage on standard output and on reflected output
+        Console.WriteLine(errorMessage);
+        output.WriteLine(errorMessage);
+    } // ReportError
+
     static void ReportError(string errorMessage, string token)      //eddited.
     {
         // Displays errorMessage on standard output and on reflected output
@@ -78,7 +85,7 @@ class Declarations
       RParenSym = 22;
 
     // and others like this
-
+ 
     // +++++++++++++++++++++++++++++ Character Handler ++++++++++++++++++++++++++
 
     const char EOF = '\0';
@@ -106,8 +113,6 @@ class Declarations
 
     // Declaring sym as a global variable is done for expediency - global variables
     // are not always a good thing
-
-    
 
     static Token sym;
 
@@ -562,7 +567,7 @@ class Declarations
                 break;
             case '.':
                 symLex.Append(ch);
-                symKind = PeriodSym; //assumeing it its a period
+                symKind = PeriodSym;
                 GetChar();
                 switch (ch)
                 {
@@ -594,29 +599,21 @@ class Declarations
             case '(':
                 GetChar();
                 symKind = LParenSym;
-                switch (ch)
-                {
-                    case '*': //this is a comment
-                        symKind = -1;
-
-                        while (true)
-                        {
+                if (ch == '*') {
+                    symKind = -1;
+                    while (true) {
+                        GetChar();
+                        if (ch == '*') {
                             GetChar();
-                            if (ch == '*')
-                            {
+                            if (ch == ')') {
                                 GetChar();
-                                if (ch == ')')
-                                {
-                                    GetChar();
-                                    break;
-                                }
+                                break;
                             }
                         }
-                        break;
-                    default:
-                        symLex.Append(ch);
-                        break;
+                    }
                 }
+                else
+                    symLex.Append('(');
                 break;
             case ')':
                 symLex.Append(ch);
@@ -655,9 +652,8 @@ class Declarations
                 break;
         }
 
-        if (symKind != -1) sym = new Token(symKind, symLex.ToString());
-        else GetSym(); //recursive call
-
+        if (symKind == -1) GetSym(); //recursive call
+        else sym = new Token(symKind, symLex.ToString()); 
     } // GetSym
 
     
@@ -676,6 +672,45 @@ class Declarations
         if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage, sym.val);
     } // Accept
 
+    //Non-Terminal First Sets
+
+    int[] First_Mod2Decl = { };
+    int[] First_TypeDecl = { };
+    int[] First_VarDecl = { };
+    int[] First_Type = { };
+    int[] First_SimpleType = { };
+    int[] First_QualIdent = { };
+    int[] First_Subrange = { };
+    int[] First_Constant = { };
+    int[] First_Enumeration = { };
+    int[] First_IdentList = { };
+    int[] First_ArrayType = { };
+    int[] First_RecordType = { };
+    int[] First_FieldLists = { };
+    int[] First_FieldList = { };
+    int[] First_SetType = { };
+    int[] First_PointerType = { };
+
+    //Non-Terminal Follow Sets
+
+    int[] Follow_Mod2Decl = { };
+    int[] Follow_TypeDecl = { };
+    int[] Follow_VarDecl = { };
+    int[] Follow_Type = { };
+    int[] Follow_SimpleType = { };
+    int[] Follow_QualIdent = { };
+    int[] Follow_Subrange = { };
+    int[] Follow_Constant = { };
+    int[] Follow_Enumeration = { };
+    int[] Follow_IdentList = { };
+    int[] Follow_ArrayType = { };
+    int[] Follow_RecordType = { };
+    int[] Follow_FieldLists = { };
+    int[] Follow_FieldList = { };
+    int[] Follow_SetType = { };
+    int[] Follow_PointerType = { };
+
+    //Non Terminal Functions
     static void Mod2Decl()
     {
         switch (sym.kind)
@@ -688,9 +723,24 @@ class Declarations
                 OutFile.StdOut.WriteLine(" " + sym.val);
                 break;
         }
-
     }
-    
+    static void Declaration() { }
+    static void TypeDecl() { }
+    static void VarDecl() { }
+    static void Type() { }
+    static void SimpleType() { }
+    static void QualIdent() { }
+    static void Subrange() { }
+    static void Constant() { }
+    static void Enumeration() { }
+    static void IdentList() { }
+    static void ArrayType() { }
+    static void RecordType() { }
+    static void FieldLists() { }
+    static void FieldList() { }
+    static void SetType() { }
+    static void PointerType() { }
+
     // +++++++++++++++++++++ Main driver function +++++++++++++++++++++++++++++++
 
     public static void Main(string[] args)
