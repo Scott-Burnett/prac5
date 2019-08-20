@@ -57,7 +57,6 @@ class Declarations
         ReportError(errorMessage);
         output.Close();
         System.Environment.Exit(1);
-
     } // Abort
 
     static void Abort(string errorMessage, string token)           //Edited
@@ -66,10 +65,9 @@ class Declarations
         ReportError(errorMessage, token);
         output.Close();
         System.Environment.Exit(1);
-
     } // Abort
 
-    // +++++++++++++++++++++++  token kinds enumeration +++++++++++++++++++++++++
+    // ++++++++++++++++++++++++ token kinds enumeration +++++++++++++++++++++++++
 
     const int
       noSym = 0,
@@ -672,7 +670,7 @@ class Declarations
     static void Accept(int wantedSym, string errorMessage)
     {
         // Checks that lookahead token is wantedSym
-        if (sym.kind == wantedSym) GetSym(); else Abort(errorMessage, sym.val);
+        if (sym.kind == wantedSym) { GetSym(); Console.WriteLine(sym.val); } else Abort(errorMessage, sym.val);
     } // Accept
 
     static void Accept(IntSet allowedSet, string errorMessage)
@@ -681,61 +679,65 @@ class Declarations
         if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage, sym.val);
     } // Accept
 
-    //Non-Terminal First Sets
+    // Non-Terminal First Sets
 
-    IntSet First_Mod2Decl = new IntSet();
-    IntSet First_Declaration = new IntSet();
-    IntSet First_TypeDecl = new IntSet();
-    IntSet First_VarDecl = new IntSet();
-    IntSet First_Type = new IntSet();
-    IntSet First_SimpleType = new IntSet();
-    IntSet First_QualIdent = new IntSet();
-    IntSet First_Subrange = new IntSet();
-    IntSet First_Constant = new IntSet();
-    IntSet First_Enumeration = new IntSet();
-    IntSet First_IdentList = new IntSet();
-    IntSet First_ArrayType = new IntSet();
-    IntSet First_RecordType = new IntSet();
-    IntSet First_FieldLists = new IntSet();
-    IntSet First_FieldList = new IntSet();
-    IntSet First_SetType = new IntSet();
-    IntSet First_PointerType = new IntSet();
+    static IntSet First_Mod2Decl = new IntSet(TypeSym, VarSym); //Nullable
+    static IntSet First_Declaration = new IntSet(TypeSym, VarSym);
+    static IntSet First_TypeDecl = new IntSet(IdentSym);
+    static IntSet First_VarDecl = new IntSet(IdentSym);
+    static IntSet First_Type = new IntSet(IdentSym, LParenSym, LBracketSym, ArraySym, RecordSym, SetSym, PointerSym);
+    static IntSet First_SimpleType = new IntSet(IdentSym, LParenSym, LBracketSym);
+    static IntSet First_QualIdent = new IntSet(IdentSym);
+    static IntSet First_Subrange = new IntSet(LBracketSym);
+    static IntSet First_Constant = new IntSet(NumSym, IdentSym);
+    static IntSet First_Enumeration = new IntSet(LParenSym);
+    static IntSet First_IdentList = new IntSet(IdentSym);
+    static IntSet First_ArrayType = new IntSet(ArraySym);
+    static IntSet First_RecordType = new IntSet(RecordSym);
+    static IntSet First_FieldLists = new IntSet(IdentSym, SemiSym); //Nullable
+    static IntSet First_FieldList = new IntSet(IdentSym); //Nullable
+    static IntSet First_SetType = new IntSet(SetSym);
+    static IntSet First_PointerType = new IntSet(PointerSym);
 
-    //Non-Terminal Follow Sets
+    // Non-Terminal Follow Sets
 
-    IntSet Follow_Mod2Decl = new IntSet();
-    IntSet Follow_Declaration = new IntSet();
-    IntSet Follow_TypeDecl = new IntSet();
-    IntSet Follow_VarDecl = new IntSet();
-    IntSet Follow_Type = new IntSet();
-    IntSet Follow_SimpleType = new IntSet();
-    IntSet Follow_QualIdent = new IntSet();
-    IntSet Follow_Subrange = new IntSet();
-    IntSet Follow_Constant = new IntSet();
-    IntSet Follow_Enumeration = new IntSet();
-    IntSet Follow_IdentList = new IntSet();
-    IntSet Follow_ArrayType = new IntSet();
-    IntSet Follow_RecordType = new IntSet();
-    IntSet Follow_FieldLists = new IntSet();
-    IntSet Follow_FieldList = new IntSet();
-    IntSet Follow_SetType = new IntSet();
-    IntSet Follow_PointerType = new IntSet();
+    static IntSet Follow_Mod2Decl = new IntSet();
+    static IntSet Follow_Declaration = new IntSet();
+    static IntSet Follow_TypeDecl = new IntSet(SemiSym);
+    static IntSet Follow_VarDecl = new IntSet(SemiSym);
+    static IntSet Follow_Type = new IntSet(SemiSym);
+    static IntSet Follow_SimpleType = new IntSet(SemiSym, CommaSym, OfSym);
+    static IntSet Follow_QualIdent = new IntSet(SemiSym, CommaSym, OfSym, LBracketSym);
+    static IntSet Follow_Subrange = new IntSet(SemiSym, CommaSym, OfSym);
+    static IntSet Follow_Constant = new IntSet(RangeSym, RBracketSym);
+    static IntSet Follow_Enumeration = new IntSet(SemiSym, CommaSym, OfSym);
+    static IntSet Follow_IdentList = new IntSet(ColonSym, RParenSym);
+    static IntSet Follow_ArrayType = new IntSet(SemiSym);
+    static IntSet Follow_RecordType = new IntSet(SemiSym);
+    static IntSet Follow_FieldLists = new IntSet(EndSym);
+    static IntSet Follow_FieldList = new IntSet(SemiSym, EndSym);
+    static IntSet Follow_SetType = new IntSet(SemiSym);
+    static IntSet Follow_PointerType = new IntSet(SemiSym);
 
-    //Non Terminal Functions
+    // Non Terminal Functions
 
     static void Mod2Decl() {
+        // Mod2Decl = { Declaration } .
         while (First_Declaration.Contains(sym.kind)) Declaration();
     }
 
     static void Declaration() {
-        if (First_Type.Contains(sym.kind)) {
+        /* Declaration = "TYPE" { TypeDecl SYNC ";" }
+                        | "VAR" { Var1Decl SYNC ";" } . */
+        Console.WriteLine("Declaration:");
+        if (sym.kind == TypeSym) {
             Accept(TypeSym, "TYPE expected");
             while (First_TypeDecl.Contains(sym.kind)) {
                 TypeDecl();
                 Accept(SemiSym, "; expected.");
             }
         }
-        else if (First_Var.Contains(sym.kind)) {
+        else if (sym.kind == VarSym) {
             Accept(VarSym, "VAR expected");
             while (First_VarDecl.Contains(sym.kind)) {
                 VarDecl();
@@ -743,22 +745,27 @@ class Declarations
             }
         }
         else
-            ReportError("Invalid Declaration");
+            ReportError("Declaration expected");
     }
 
     static void TypeDecl() {
+        // TypeDecl = identifier "=" Type .
+        Console.WriteLine("TypeDecl:");
         Accept(IdentSym, "Identifier expected");
         Accept(AssignSym, "= expected");
-        if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Type declaration");
+        if (First_Type.Contains(sym.kind)) Type(); else ReportError("Type Expected");
     }
 
     static void VarDecl() {
-        if (firs_IdentList.Contains(sym.kind)) IdentList(); else ReportError("IdentList Expected");
+        // VarDecl = IdentList ":" Type .
+        Console.WriteLine("VarDecl:");
+        if (First_IdentList.Contains(sym.kind)) IdentList(); else ReportError("IdentList Expected");
         Accept(ColonSym, ": expected");
-        if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Type declaration");
+        if (First_Type.Contains(sym.kind)) Type(); else ReportError("Type expected");
     }
 
     static void Type() {
+        // Type = SimpleType | ArrayType | RecordType | SetType | PointerType .
         if (First_SimpleType.Contains(sym.kind)) SimpleType();
         else if (First_ArrayType.Contains(sym.kind)) ArrayType();
         else if (First_RecordType.Contains(sym.kind)) RecordType();
@@ -768,6 +775,7 @@ class Declarations
     }
 
     static void SimpleType() {
+        // SimpleType = QualIdent [ Subrange ] | Enumeration | Subrange .
         if (First_QualIdent.Contains(sym.kind))
         {
             QualIdent();
@@ -779,6 +787,7 @@ class Declarations
     }
 
     static void QualIdent() {
+        // Qualident = identifier { "." identifier } .
         Accept(IdentSym, "Identifier expected");
         while (sym.kind == PeriodSym) {
             GetSym();
@@ -787,6 +796,7 @@ class Declarations
     }
 
     static void Subrange() {
+        // Subrange = "[" Constant ".." Constant "]" .
         Accept(LBracketSym, "[ expected");
         if (First_Constant.Contains(sym.kind)) Constant(); else ReportError("Invalid Constnt");
         Accept(RangeSym, ".. expected");
@@ -795,6 +805,7 @@ class Declarations
     }
 
     static void Constant() {
+        // Constant = number | identifier .
         switch (sym.kind) {
             case NumSym:
             case IdentSym:
@@ -802,16 +813,19 @@ class Declarations
                 break;
             default:
                 ReportError("Constant expected");
+                break;
         }
     }
 
     static void Enumeration() {
+        // Enumeration = "(" IdentList ")" .
         Accept(LParenSym, "( expected");
-        if (First_IdenList.Contains(sym.kind)) IdentList(); else ReportError("Invalid Enumeration");
+        if (First_IdentList.Contains(sym.kind)) IdentList(); else ReportError("Invalid Enumeration");
         Accept(RBracketSym, ") expected");
     }
 
     static void IdentList() {
+        // IdentList = identifier { "." identifier } .
         Accept(IdentSym, "Identifier expected");
         while (sym.kind == CommaSym) {
             GetSym();
@@ -820,23 +834,26 @@ class Declarations
     }
 
     static void ArrayType() {
+        // ArrayType = "ARRAY" SimpleType { "," SimpleType } "OF" Type .
         Accept(ArraySym, "ARRAY expected");
-        if (First_SimpleType.Containt(sym.kind)) SimpleType(); else ReportError("Invalid Array Type");
+        if (First_SimpleType.Contains(sym.kind)) SimpleType(); else ReportError("Invalid Array Type");
         while (sym.kind == PeriodSym) {
             GetSym();
-            if (First_SimpleType.Containt(sym.kind)) SimpleType(); else ReportError("Invalid Array Type");
+            if (First_SimpleType.Contains(sym.kind)) SimpleType(); else ReportError("Invalid Array Type");
         }
         Accept(OfSym, "OF expected");
-        if (First_Type.Contains(sym.kind)) Type; else ReportError("Invalid Array Type");
+        if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Array Type");
     }
 
     static void RecordType() {
+        // RecordType = "RECORD" FieldLists "END" .
         Accept(RecordSym, "RECCORD expected");
         if (First_FieldLists.Contains(sym.kind)) FieldLists(); else ReportError("Invalid record Type");
         Accept(EndSym, "END expected");
     }
 
     static void FieldLists() {
+        // FieldLists = FieldList { ";" FieldList } .
         if (First_FieldList.Contains(sym.kind)) FieldList(); else ReportError("Invalid FieldLists");
         while (sym.kind == SemiSym) {
             GetSym();
@@ -845,22 +862,25 @@ class Declarations
     }
 
     static void FieldList() {
+        // FieldList = [ IdentList ";" Type ] .
         if (sym.kind == IdentSym)
         {
             GetSym();
             Accept(ColonSym, ": expected");
             if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Field List");
         }
-        else if (Follow_FieldList.Contains(sym.kind)) ; else ReportError("Invalid Field List");
+        else if (Follow_FieldList.Contains(sym.kind)); else ReportError("Invalid Field List");
     }
 
     static void SetType() {
+        // SetType = "SET" "OF" SimpleType .
         Accept(SetSym, "SET expected");
         Accept(OfSym, "OF expected");
         if (First_SimpleType.Contains(sym.kind)) SimpleType(); else ReportError("Invalid Set Type");
     }
 
-    static void PointerType() {
+    static void PointerType() { 
+        // PointerType = "POINTER" "TO" Type .
         Accept(PointerSym, "POINTERR expected");
         Accept(ToSym, "TO expected");
         if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Pointer Type");
@@ -882,7 +902,7 @@ class Declarations
         GetChar();                                  // Lookahead character
 
         //  To test the scanner we can use a loop like the following:
-       /* 
+       /*
          do
          {
              GetSym();                                 // Lookahead symbol
@@ -897,10 +917,10 @@ class Declarations
         do
         {
             GetSym();                                   // Lookahead symbol
-            if (First_Mod2decl.contains(sym.kind)) Mod2Decl(); else ReportError ("Incorrect starting symbol");                                // Start to parse from the goal symbol
-        } while (sym.kind != EOFSym);                                        // if we get back here everything must have been satisfactory
+            if (First_Mod2Decl.Contains(sym.kind)) Mod2Decl(); else ReportError ("Incorrect starting symbol"); // Start to parse from the goal symbol
+        } while (sym.kind != EOFSym);                  // if we get back here everything must have been satisfactory
 
-        (errorCnt == 0) ? Console.WriteLine("Parsed correctly") : Console.WriteLine("End of file reached/nError Count: " + errorCnt);
+         Console.WriteLine( (errorCnt == 0) ? "Parsed correctly" : ("End of file reached/nError Count: " + errorCnt));
         output.Close();
     } // Main
 } // Declarations
