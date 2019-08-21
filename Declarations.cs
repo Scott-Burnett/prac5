@@ -670,13 +670,13 @@ class Declarations
     static void Accept(int wantedSym, string errorMessage)
     {
         // Checks that lookahead token is wantedSym
-        if (sym.kind == wantedSym) { GetSym(); Console.WriteLine(sym.val); } else Abort(errorMessage, sym.val);
+        if (sym.kind == wantedSym) { Console.WriteLine(sym.val); GetSym(); } else Abort(errorMessage);
     } // Accept
 
     static void Accept(IntSet allowedSet, string errorMessage)
     {
         // Checks that lookahead token is in allowedSet
-        if (allowedSet.Contains(sym.kind)) GetSym(); else Abort(errorMessage, sym.val);
+        if (allowedSet.Contains(sym.kind)) { Console.WriteLine(sym.val); GetSym(); } else Abort(errorMessage, sym.val);
     } // Accept
 
     // Non-Terminal First Sets
@@ -746,36 +746,38 @@ class Declarations
         }
         else
             ReportError("Declaration expected");
-    }
+    } // Declaration
 
     static void TypeDecl() {
         // TypeDecl = identifier "=" Type .
-        Console.WriteLine("TypeDecl:");
+        Console.WriteLine("TypeDecl()");
         Accept(IdentSym, "Identifier expected");
         Accept(AssignSym, "= expected");
         if (First_Type.Contains(sym.kind)) Type(); else ReportError("Type Expected");
-    }
+    } // TypeDecl
 
     static void VarDecl() {
         // VarDecl = IdentList ":" Type .
-        Console.WriteLine("VarDecl:");
+        Console.WriteLine("VarDecl()");
         if (First_IdentList.Contains(sym.kind)) IdentList(); else ReportError("IdentList Expected");
         Accept(ColonSym, ": expected");
         if (First_Type.Contains(sym.kind)) Type(); else ReportError("Type expected");
-    }
+    } // VarDecl
 
     static void Type() {
         // Type = SimpleType | ArrayType | RecordType | SetType | PointerType .
+        Console.WriteLine("Type()");
         if (First_SimpleType.Contains(sym.kind)) SimpleType();
         else if (First_ArrayType.Contains(sym.kind)) ArrayType();
         else if (First_RecordType.Contains(sym.kind)) RecordType();
         else if (First_SetType.Contains(sym.kind)) SetType();
         else if (First_PointerType.Contains(sym.kind)) PointerType();
         else ReportError("Invalid Type");
-    }
+    } // Type
 
     static void SimpleType() {
         // SimpleType = QualIdent [ Subrange ] | Enumeration | Subrange .
+        Console.WriteLine("SimpleType()");
         if (First_QualIdent.Contains(sym.kind))
         {
             QualIdent();
@@ -784,57 +786,65 @@ class Declarations
         else if (First_Enumeration.Contains(sym.kind)) Enumeration();
         else if (First_Subrange.Contains(sym.kind)) Subrange();
         else ReportError("Invalid Simple Type");
-    }
+    } // SimpleType
 
     static void QualIdent() {
         // Qualident = identifier { "." identifier } .
+        Console.WriteLine("QualIdent()");
         Accept(IdentSym, "Identifier expected");
         while (sym.kind == PeriodSym) {
             GetSym();
             Accept(IdentSym, "Identifier expected");
         }
-    }
+    } // QualIdent
 
     static void Subrange() {
         // Subrange = "[" Constant ".." Constant "]" .
+        Console.WriteLine("Subrange()");
         Accept(LBracketSym, "[ expected");
         if (First_Constant.Contains(sym.kind)) Constant(); else ReportError("Invalid Constnt");
         Accept(RangeSym, ".. expected");
         if (First_Constant.Contains(sym.kind)) Constant(); else ReportError("Invalid Constnt");
         Accept(RBracketSym, "] expected");
-    }
+    } // Subrange
 
     static void Constant() {
         // Constant = number | identifier .
+        Console.WriteLine("Constant()");
         switch (sym.kind) {
             case NumSym:
+                Accept(NumSym, "Number expected");
+                break;
             case IdentSym:
-                GetChar();
+                Accept(IdentSym, "Identifier expected");
                 break;
             default:
                 ReportError("Constant expected");
                 break;
         }
-    }
+    } // Constant
 
     static void Enumeration() {
         // Enumeration = "(" IdentList ")" .
+        Console.WriteLine("Enumeration()");
         Accept(LParenSym, "( expected");
         if (First_IdentList.Contains(sym.kind)) IdentList(); else ReportError("Invalid Enumeration");
-        Accept(RBracketSym, ") expected");
-    }
+        Accept(RParenSym, ") expected");
+    } // Enumeration
 
     static void IdentList() {
         // IdentList = identifier { "." identifier } .
+        Console.WriteLine("IdentList()");
         Accept(IdentSym, "Identifier expected");
         while (sym.kind == CommaSym) {
             GetSym();
             Accept(IdentSym, "Identifier expected");
         }
-    }
+    } // IdentList
 
     static void ArrayType() {
         // ArrayType = "ARRAY" SimpleType { "," SimpleType } "OF" Type .
+        Console.WriteLine("ArrayType()");
         Accept(ArraySym, "ARRAY expected");
         if (First_SimpleType.Contains(sym.kind)) SimpleType(); else ReportError("Invalid Array Type");
         while (sym.kind == PeriodSym) {
@@ -843,48 +853,53 @@ class Declarations
         }
         Accept(OfSym, "OF expected");
         if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Array Type");
-    }
+    } // ArrayType
 
     static void RecordType() {
         // RecordType = "RECORD" FieldLists "END" .
+        Console.WriteLine("RecordType()");
         Accept(RecordSym, "RECCORD expected");
         if (First_FieldLists.Contains(sym.kind)) FieldLists(); else ReportError("Invalid record Type");
         Accept(EndSym, "END expected");
-    }
+    } // RecordType
 
     static void FieldLists() {
         // FieldLists = FieldList { ";" FieldList } .
+        Console.WriteLine("FieldLists()");
         if (First_FieldList.Contains(sym.kind)) FieldList(); else ReportError("Invalid FieldLists");
         while (sym.kind == SemiSym) {
             GetSym();
             if (First_FieldList.Contains(sym.kind)) FieldList(); else ReportError("Invalid FieldLists");
         }
-    }
+    } // FieldLists
 
     static void FieldList() {
         // FieldList = [ IdentList ";" Type ] .
-        if (sym.kind == IdentSym)
+        Console.WriteLine("FieldList()");
+        if (First_IdentList.Contains(sym.kind))
         {
-            GetSym();
+            IdentList();
             Accept(ColonSym, ": expected");
             if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Field List");
         }
         else if (Follow_FieldList.Contains(sym.kind)); else ReportError("Invalid Field List");
-    }
+    } // FieldList
 
     static void SetType() {
         // SetType = "SET" "OF" SimpleType .
+        Console.WriteLine("SetType()");
         Accept(SetSym, "SET expected");
         Accept(OfSym, "OF expected");
         if (First_SimpleType.Contains(sym.kind)) SimpleType(); else ReportError("Invalid Set Type");
-    }
+    } // SetType
 
-    static void PointerType() { 
+    static void PointerType() {
         // PointerType = "POINTER" "TO" Type .
+        Console.WriteLine("PointerType()");
         Accept(PointerSym, "POINTERR expected");
         Accept(ToSym, "TO expected");
         if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Pointer Type");
-    }
+    } // PointerType
 
     // +++++++++++++++++++++ Main driver function +++++++++++++++++++++++++++++++
 
@@ -902,7 +917,7 @@ class Declarations
         GetChar();                                  // Lookahead character
 
         //  To test the scanner we can use a loop like the following:
-       /*
+        /*
          do
          {
              GetSym();                                 // Lookahead symbol
@@ -920,7 +935,7 @@ class Declarations
             if (First_Mod2Decl.Contains(sym.kind)) Mod2Decl(); else ReportError ("Incorrect starting symbol"); // Start to parse from the goal symbol
         } while (sym.kind != EOFSym);                  // if we get back here everything must have been satisfactory
 
-         Console.WriteLine( (errorCnt == 0) ? "Parsed correctly" : ("End of file reached/nError Count: " + errorCnt));
+         Console.WriteLine( (errorCnt == 0) ? "Parsed correctly" : ("End of file reached\nError Count: " + errorCnt));
         output.Close();
     } // Main
 } // Declarations
