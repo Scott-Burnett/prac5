@@ -1,7 +1,6 @@
-// Do learn to insert your names and a brief description of what the program is supposed to do!
-
 // This is a skeleton program for developing a parser for Modula-2 declarations
-// P.D. Terry, Rhodes University Addaped by Redy van DYk && Scott Burnett
+// P.D. Terry, Rhodes University
+// Addaped by Redy van DYk && Scott Burnett
 using Library;
 using System;
 using System.Text;
@@ -38,7 +37,7 @@ class Declarations
     static void ReportError(string errorMessage)
     {
         // Displays errorMessage on standard output and on reflected output
-        Console.WriteLine("(" + lineCnt + ", " + symPos + ") : error: " + errorMessage);
+        Console.WriteLine("(" + lineCnt + ", " + symPos + ") : error[" + errorCnt + "]: " + errorMessage);
         output.WriteLine(errorMessage);
         errorCnt++;
     } // ReportError
@@ -871,8 +870,7 @@ class Declarations
 
     static void FieldList() {
         // FieldList = [ IdentList ";" Type ] .
-        if (First_IdentList.Contains(sym.kind))
-        {
+        if (First_IdentList.Contains(sym.kind)) {
             IdentList();
             Accept(ColonSym, ": expected");
             if (First_Type.Contains(sym.kind)) Type(); else ReportError("Invalid Field List");
@@ -908,19 +906,6 @@ class Declarations
         output = new OutFile(NewFileName(args[0], ".out"));
 
         GetChar();                                  // Lookahead character
-
-        //  To test the scanner we can use a loop like the following:
-        /*
-         do
-         {
-             GetSym();                                 // Lookahead symbol
-             OutFile.StdOut.Write(sym.kind, 3);
-             OutFile.StdOut.WriteLine(" " + sym.val);  // See what we got
-         } while (sym.kind != EOFSym);
-
-        /*  After the scanner is debugged we shall substitute this code: 
-        input = new InFile(args[0]);
-        output = new OutFile(NewFileName(args[0], ".out"));    // reseting it so we can test both at the same time*/
 
         do
         {
